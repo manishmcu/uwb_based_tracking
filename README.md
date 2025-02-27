@@ -1,27 +1,45 @@
-Code Versions Guidelines:
-Inside Every web_app folder there is 'app.py', 'templates' directory of app.py, and 'web_uwb_toge.ino' code inside folder.
-'app.py' and 'templates' are for running a local web-server(on windows) to control robot / configure anchors, and web_uwb_together code will be uploaded to the microcontroller(esp32-c3) to get the sensor data connecting with same network.
+# Code Versions Guidelines  
 
-web_app
+Each `web_app` folder contains:  
+- `app.py` – Python Flask web server for controlling the robot or configuring anchors.  
+- `templates/` – HTML templates used by `app.py` for the web interface.  
+- `web_uwb_toge.ino` – ESP32-C3 firmware for retrieving UWB sensor data over the network.  
 
-Details: 
-'app.py'- This Python script establishes a Flask web server (app) --> manages and controls a robot through a network --> discovers the robot's IP using get_ip_addresses() (scans network via nmap) --> validates devices with check_if_robot() --> assigns URLs for commands like movement (MOVE_URL, e.g., http://<ROBOT_IP>:8090/chassis/moves) and cancellation (CANCEL_MOVE, e.g., http://<ROBOT_IP>:8090/chassis/moves/current) --> fetches position data from the overlay link (http://192.168.1.34/get_position) using fetch_position_data() --> uses the data in tracking_task() for real-time robot tracking and control --> provides web endpoints (/start_tracking, /stop_tracking, /call, /cancel) for user interaction via http://127.0.0.1:5000/ --> employs ThreadPoolExecutor for concurrent IP scanning --> uses Timer for scheduling tasks like browser opening or tracking initiation --> ensures robust error handling for seamless integration of local network discovery and RESTful communication --> enables dynamic robotic interactions.
+### **web_app**  
+- `app.py`:  
+  - Runs a Flask web server on Windows for robot control and anchor configuration.  
+  - Scans the network (`get_ip_addresses()` via `nmap`) to discover robots.  
+  - Validates devices (`check_if_robot()`) and assigns URLs for movement and cancellation commands.  
+  - Fetches position data from the overlay API (`fetch_position_data()`) for real-time tracking.  
+  - Provides web endpoints (`/start_tracking`, `/stop_tracking`, `/call`, `/cancel`) for user interaction at `http://127.0.0.1:5000/`.  
+  - Uses `ThreadPoolExecutor` for concurrent IP scanning and `Timer` for scheduling tasks.  
 
-'web_uwb_toge.ino'- 
-This code creates a Wi-Fi-enabled positioning system using UWB (Ultra-Wideband) communication via an ESP32 module with static IP configuration for stable network connectivity. --> It uses ESPAsyncWebServer (ESPAsyncWebServer) to define multiple HTTP GET endpoints: the root endpoint serves a status message, and /get_position computes and serves the tag's position based on trilateration calculated using predefined anchor coordinates and ranges. --> The /get_ranges endpoint provides the raw range data from the anchors. --> The UWB module communicates with the ESP32 via HardwareSerial (HardwareSerial), and the system reads and processes distance data to update range values (a1_range, a2_range). --> Trilateration is performed using a mathematical model to determine the tag's position based on the distances between anchors, with results logged to the serial monitor for debugging. --> This system can be useful in applications requiring real-time location tracking such as indoor navigation or asset tracking in industrial environments.
+- `web_uwb_toge.ino`:  
+  - Implements UWB-based positioning with an ESP32 (static IP for stable connectivity).  
+  - Hosts an asynchronous web server (`ESPAsyncWebServer`) to serve `get_position` (trilateration) and `get_ranges` (raw distance data).  
+  - Communicates with the UWB module via `HardwareSerial`, computes tag position, and logs data to the serial monitor.  
 
+### **web_app2**  
+- `app.py`:  
+  - Flask web server for managing anchor data in CSV format under `projects/`.  
+  - Uses a Jinja2 filter (`datetimeformat`) for timestamps and trigonometry (`calculate_coordinates()`) for anchor positions.  
+  - Provides `/` for project listing, `/new_project` for capturing distances, `/edit_project` for modification, and `/update` to send anchor data to an ESP32 endpoint.  
+  - Ensures ESP32 data validation and error handling.  
 
-web_app2
+- `web_uwb_toge.ino`:  
+  - ESP32 web server with `ESPAsyncWebServer` for GET/POST requests.  
+  - Stores/retrieves anchor data using `Preferences.h` and `ArduinoJson`.  
+  - Receives JSON anchor data via POST, saves it persistently, and serves stored data via GET.  
 
-Details:
-'app.py'- This Python script sets up a Flask web server (app) --> manages projects for storing anchor data in CSV format under the projects directory (BASE_DIR, e.g., projects/) --> formats timestamps using a custom Jinja2 filter (datetimeformat) for rendering templates --> calculates anchor coordinates based on distances using trigonometric functions (calculate_coordinates()) --> provides a route (/) to render the home page (home.html) --> allows users to create a new project via /new_project by capturing distances and calculating coordinates --> saves project anchor data to CSV using save_anchors_to_csv() --> enables project selection and editing through /edit_project and /edit_project/<project_id> --> retrieves existing anchor data from CSV for modification or update --> provides an /update route to list all projects with timestamps and send selected project data to an ESP32 endpoint (e.g., http://192.168.1.184/save) --> validates response from the ESP32 to confirm successful data transfer or display errors. This architecture facilitates anchor data management and dynamic communication with ESP32 devices for localization or tracking projects.
+### **web_app3**  
+- `app.py`:  
+  - Flask web server for project-based ESP32 communication.  
+  - Uses `BASE_DIR` for storing project files, `calculate_coordinates()` for anchor positions, and CSV for data storage.  
+  - Provides `/` for homepage, `/new_project` for creating projects, `/edit_project` for modifications, `/get_ranges` for ESP32 range data, and `/update` to send anchor data.  
+  - Implements `/live_distances` for real-time ESP32 distance tracking.  
 
-'web_uwb_toge.ino'- The code creates an ESP32-based web server that connects to a Wi-Fi network (WiFi.h) with static IP configuration for stable network communication. --> It uses the ESPAsyncWebServer library (ESPAsyncWebServer) to handle GET and POST HTTP requests for saving and retrieving anchor data stored in Preferences (Preferences.h) on the device. --> On receiving POST requests, the server parses incoming JSON data using the ArduinoJson library (ArduinoJson) and saves the valid data into preferences, while GET requests serve the stored anchor data as a response. --> The system continuously stores and retrieves anchor data, making it suitable for applications like IoT and robotics that require persistent data storage and web-based access.
-
-
-web_app3
-
-Details:
-'app.py'- This Python Flask application sets up a web server (app) --> manages projects and communicates with ESP32 devices --> uses BASE_DIR (projects) to store project files and ensures the directory exists --> defines a Jinja2 filter (datetimeformat) to format UNIX timestamps into human-readable strings --> calculates anchor coordinates using trigonometry (calculate_coordinates) and saves anchor data into CSV files (save_anchors_to_csv) --> provides a homepage route (/) to render home.html --> allows project creation via /new_project, capturing anchor distances dynamically and computing their coordinates --> saves anchor data to CSV and displays a success message --> enables project editing through /edit_project and /edit_project/<project_id>, allowing retrieval and modification of anchor data from CSV files --> provides /get_ranges to fetch anchor range data from ESP32 at http://192.168.1.34/get_ranges --> facilitates anchor data update on the ESP32 via /update, processing and sending data from the selected project to http://192.168.1.34/save --> includes a /live_distances route to fetch live distances from the ESP32, parsing and returning the data as JSON --> handles errors, timeouts, and invalid data gracefully. This structure integrates project management with ESP32-based localization or distance-tracking systems
-
-'web_uwb_toge.ino'- The code implements an ESP32-based positioning system that uses Wi-Fi connectivity (WiFi.h) to enable an asynchronous HTTP server (ESPAsyncWebServer) for handling routes like /get_position (which calculates tag position using trilateration) and /save (for storing anchor data in JSON format using the ArduinoJson library (ArduinoJson)). --> It communicates with a UWB module via UART to obtain real-time distance data and uses trilateration to compute tag coordinates. --> The Preferences library (Preferences.h) is utilized to store the anchor data persistently. --> The system also supports static IP configuration for network reliability and is ideal for use in robotics and IoT tracking systems by providing real-time position data through the /get_ranges route.
+- `web_uwb_toge.ino`:  
+  - ESP32 firmware enabling Wi-Fi-based positioning.  
+  - Hosts `ESPAsyncWebServer` to handle `get_position` (trilateration) and `save` (anchor data storage).  
+  - Uses `Preferences.h` for persistent storage and `ArduinoJson` for JSON parsing.  
+  - Fetches real-time UWB distance data via UART, processes it, and provides updates through `/get_ranges`.  
