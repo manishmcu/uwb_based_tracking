@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Control Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        button {
+            flex: 1;
+            margin: 5px;
+            padding: 15px 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .stop-button {
+            background-color: #dc3545;
+        }
+        .stop-button:hover {
+            background-color: #a71d2a;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #555;
+        }
+        footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Robot Control Panel</h1>
+        <div class="row">
+            <button id="start_tracking">Start Tracking</button>
+            <button id="stop_tracking" class="stop-button">Stop Tracking</button>
+        </div>
+        <div class="row">
+            <button id="call">Call Robot</button>
+            <button id="cancel" class="stop-button">Cancel Action</button>
+        </div>
+        <div class="status" id="status">Status: Idle</div>
+    </div>
+    <footer>© 2024 Robot Controller. All Rights Reserved.</footer>
+
+    <script>
+        function handleButtonClick(endpoint, buttonId) {
+            fetch(endpoint, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                    document.getElementById('status').innerText = "Status: " + data.message;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('status').innerText = "Status: An error occurred.";
+                });
+        }
+
+        document.getElementById('start_tracking').addEventListener('click', () => handleButtonClick('/start_tracking'));
+        document.getElementById('stop_tracking').addEventListener('click', () => handleButtonClick('/stop_tracking'));
+        document.getElementById('call').addEventListener('click', () => handleButtonClick('/call'));
+        document.getElementById('cancel').addEventListener('click', () => handleButtonClick('/cancel'));
+    </script>
+</body>
+</html>

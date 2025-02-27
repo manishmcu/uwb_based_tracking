@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Projects</title>
+</head>
+<body>
+    <h1>Update Projects</h1>
+
+    <!-- Select Project Dropdown -->
+    <form method="POST">
+        <label for="selected_project">Select Project:</label>
+        <select id="selected_project" name="selected_project" required>
+            <option value="" disabled selected>Select a project</option>
+            {% for project in projects %}
+            <option value="{{ project.name }}">{{ project.name }} - Last Modified: {{ project.timestamp }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Load Project</button>
+    </form>
+
+    <hr>
+
+    <!-- Display Selected Project's JSON -->
+    {% if selected_project %}
+    <h2>Selected Project: {{ selected_project.name }}</h2>
+    <pre>{{ selected_project.anchors | tojson(indent=2) }}</pre>
+    {% elif message %}
+    <p style="color: red;">{{ message }}</p>
+    {% endif %}
+</body>
+</html>

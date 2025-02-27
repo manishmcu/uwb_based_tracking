@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Project</title>
+</head>
+<body>
+    <h1>Edit Project</h1>
+    <form method="POST">
+        <label>Select Project:</label>
+        <select name="project">
+            {% for project in projects %}
+            <option value="{{ project }}">{{ project }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Load Project</button>
+    </form>
+</body>
+</html>

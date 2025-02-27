@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Project</title>
+    <script>
+        function addAnchorInput() {
+            var container = document.getElementById("anchor-input-container");
+            var anchorIndex = container.children.length + 3; // Start from A3
+            var inputGroup = document.createElement("div");
+            inputGroup.classList.add("anchor-input-group");
+            inputGroup.innerHTML = `
+                <label>A${anchorIndex} distance from A1: </label><input type="number" name="distance_a${anchorIndex}_a1" required>
+                <label>A${anchorIndex} distance from A2: </label><input type="number" name="distance_a${anchorIndex}_a2" required>
+                <button type="button" onclick="removeAnchorInput(this)">Remove</button>
+            `;
+            container.appendChild(inputGroup);
+        }
+
+        function removeAnchorInput(button) {
+            button.parentElement.remove();
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Create a New Project</h1>
+    <form action="/new_project" method="POST">
+        <label for="project_id">Project ID:</label>
+        <input type="text" name="project_id" required>
+        <br>
+
+        <h2>Anchor A1 and A2 Setup</h2>
+        A1 Distance from (0,0): <input type="number" name="distance_a1" required><br>
+        A2 Distance from (0,0): <input type="number" name="distance_a2" required><br>
+
+        <h2>Additional Anchors</h2>
+        <button type="button" onclick="addAnchorInput()">Add Anchor</button>
+        <div id="anchor-input-container"></div>
+
+        <br><br>
+        <input type="submit" value="Save Project">
+    </form>
+
+</body>
+</html>
